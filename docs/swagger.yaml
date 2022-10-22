@@ -1,0 +1,31 @@
+info:
+  contact: {}
+paths:
+  /problem-list:
+    get:
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: size
+        in: query
+        name: size
+        type: integer
+      - description: keyword
+        in: query
+        name: keyword
+        type: string
+      - description: category_identity
+        in: query
+        name: category_identity
+        type: string
+      responses:
+        "200":
+          description: '{"code":"200","data":""}'
+          schema:
+            type: string
+      summary: 问题列表
+      tags:
+      - 公共方法
+swagger: "2.0"
