@@ -22,6 +22,8 @@ func Router() *gin.Engine {
 
 	//用户登录
 	r.POST("/login", service.Login)
+	//用户注册
+	r.POST("/register", service.Register)
     //用户详情
     r.GET("/user-detail", service.GetUserDetail)
 	//发送验证码

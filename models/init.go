@@ -3,11 +3,14 @@ package models
 import (
 	"log"
 
+	"github.com/go-redis/redis"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 var DB = Init()
+
+var RDB = InitRedisDB()
 
 func Init() *gorm.DB {
 	// 参考 https://github.com/go-sql-driver/mysql#dsn-data-source-name 获取详情
@@ -17,4 +20,12 @@ func Init() *gorm.DB {
 		log.Println("gorm init error:", err)
 	}
 	return db
+}
+
+func InitRedisDB() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 }
