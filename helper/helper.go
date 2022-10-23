@@ -8,6 +8,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jordan-wright/email"
+	uuid "github.com/satori/go.uuid"
 )
 
 type UserClaims struct {
@@ -57,15 +58,20 @@ func AnalyseToken(tokenString string) (*UserClaims, error) {
 }
 
 // 发送验证码
-func SendCode(toUserEmail, code string)  error {
+func SendCode(toUserEmail, code string) error {
 
 	e := email.NewEmail()
 	e.From = "zyj <rain971124@163.com>"
 	e.To = []string{toUserEmail}
-	e.Subject = "验证码发送测试"
-	e.HTML = []byte("您的验证码是<b>"+code+"</b>")
+	e.Subject = "验证码已发送，请查收"
+	e.HTML = []byte("您的验证码是<b>" + code + "</b>,有效时间3分钟")
 	//返回EOF时，关闭SSL重试
 	return e.SendWithTLS("smtp.163.com:465",
 		smtp.PlainAuth("", "rain971124@163.com", "CVOWBHXPZLCUMOZV", "smtp.163.com"),
 		&tls.Config{InsecureSkipVerify: true, ServerName: "smtp.163.com"})
+}
+
+// uuid
+func GetUUID() string {
+	return uuid.NewV4().String()
 }
