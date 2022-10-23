@@ -15,7 +15,21 @@ func Router() *gin.Engine {
 	//路由规则
 	r.GET("/ping", service.Ping)
 
+	//问题列表
 	r.GET("/problem-list", service.GetProblemList)
+	//问题详情
+	r.GET("/problem-detail", service.GetProblemDetail)
+
+	//用户登录
+	r.POST("/login", service.Login)
+    //用户详情
+    r.GET("/user-detail", service.GetUserDetail)
+	//发送验证码
+	r.POST("/send-code", service.SendCode)
+
+	//提交记录
+	r.GET("/submit-list", service.GetSubmitList)
+
 
 	return r
 
