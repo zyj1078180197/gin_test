@@ -129,49 +129,64 @@ func Submit(c *gin.Context) {
 	var lock sync.Mutex
 	// 提示信息
 	var msg string
-	for _, testCase := range pb.TestCases {
-		testCase := testCase
+	// 检查代码的合法性
+	v, err := helper.CheckGoCodeValid(path)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "Code Check Error:" + err.Error(),
+		})
+		return
+	}
+	if !v {
 		go func() {
-			cmd := exec.Command("go", "run", path)
-			var out, stderr bytes.Buffer
-			cmd.Stderr = &stderr
-			cmd.Stdout = &out
-			stdinPipe, err := cmd.StdinPipe()
-			if err != nil {
-				log.Fatalln(err)
-			}
-			io.WriteString(stdinPipe, testCase.Input+"\n")
+			EC <- struct{}{}
+		}()
+	} else {
+		for _, testCase := range pb.TestCases {
+			testCase := testCase
+			go func() {
+				cmd := exec.Command("go", "run", path)
+				var out, stderr bytes.Buffer
+				cmd.Stderr = &stderr
+				cmd.Stdout = &out
+				stdinPipe, err := cmd.StdinPipe()
+				if err != nil {
+					log.Fatalln(err)
+				}
+				io.WriteString(stdinPipe, testCase.Input+"\n")
 
-			var bm runtime.MemStats
-			runtime.ReadMemStats(&bm)
-			if err := cmd.Run(); err != nil {
-				log.Println(err, stderr.String())
-				if err.Error() == "exit status 2" {
-					msg = stderr.String()
-					CE <- 1
+				var bm runtime.MemStats
+				runtime.ReadMemStats(&bm)
+				if err := cmd.Run(); err != nil {
+					log.Println(err, stderr.String())
+					if err.Error() == "exit status 2" {
+						msg = stderr.String()
+						CE <- 1
+						return
+					}
+				}
+				var em runtime.MemStats
+				runtime.ReadMemStats(&em)
+
+				// 答案错误
+				if testCase.Output != out.String() {
+					WA <- 1
 					return
 				}
-			}
-			var em runtime.MemStats
-			runtime.ReadMemStats(&em)
-
-			// 答案错误
-			if testCase.Output != out.String() {
-				WA <- 1
-				return
-			}
-			// 运行超内存
-			if em.Alloc/1024-(bm.Alloc/1024) > uint64(pb.MaxMem) {
-				OOM <- 1
-				return
-			}
-			lock.Lock()
-			passCount++
-			if passCount == len(pb.TestCases) {
-				AC <- 1
-			}
-			lock.Unlock()
-		}()
+				// 运行超内存
+				if em.Alloc/1024-(bm.Alloc/1024) > uint64(pb.MaxMem) {
+					OOM <- 1
+					return
+				}
+				lock.Lock()
+				passCount++
+				if passCount == len(pb.TestCases) {
+					AC <- 1
+				}
+				lock.Unlock()
+			}()
+		}
 	}
 
 	select {
