@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -215,9 +214,8 @@ func Submit(c *gin.Context) {
 			msg = "运行超时"
 		}
 	}
-
+	//删除文件夹
 	err = os.RemoveAll(dirName)
-	fmt.Println("删除文件夹：", err)
 
 	if err = models.DB.Transaction(func(tx *gorm.DB) error {
 		err = tx.Create(sb).Error
