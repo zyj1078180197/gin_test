@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"zyj.cn/define"
 	"zyj.cn/helper"
 	"zyj.cn/models"
 )
@@ -124,7 +126,7 @@ func SendCode(c *gin.Context) {
 
 	//code := "123456"
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	code := strconv.Itoa(r.Intn(1000000))//随机生成六位数验证码
+	code := strconv.Itoa(r.Intn(1000000)) //随机生成六位数验证码
 	err := helper.SendCode(email, code)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -227,7 +229,7 @@ func Register(c *gin.Context) {
 	}
 
 	//生成token
-	token, err := helper.GenerateToken(Identity, name, 0)
+	token, err := helper.GenerateToken(Identity, name, data.IsAdmin)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": -1,
@@ -242,3 +244,45 @@ func Register(c *gin.Context) {
 	})
 
 }
+
+// GetRankList
+// @Tags 公共方法
+// @Summary 用户排行榜
+// @Param page query int false "page"
+// @Param size query int false "size"
+// @Success 200 {string} json "{"code":"200","data":""}"
+// @Router /rank-list [get]
+func GetRankList(c *gin.Context) {
+
+	size, _ := strconv.Atoi(c.DefaultQuery("size", define.DefaultSize))
+	page, err := strconv.Atoi(c.DefaultQuery("page", define.DefaultPage))
+	if err != nil {
+		log.Println("get ProblemBasic page parse error:", err)
+		return
+	}
+	pageQuery := (page - 1) * size
+	var count int64
+	list := make([]*models.UserBasic, 0)
+	err = models.DB.Model(new(models.UserBasic)).Count(&count).Order("pass_num DESC,submit_num ASC").
+		Offset(pageQuery).Limit(size).Find(&list).Error
+	if err != nil {
+		log.Println("get rank list error:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "get rank list error:" + err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": map[string]interface{}{
+			"count": count,
+			"page":  page,
+			"size":  size,
+			"data":  list,
+		},
+	})
+
+}
+
+
