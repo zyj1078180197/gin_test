@@ -81,20 +81,20 @@ func GetUUID() string {
 
 // code save
 // 保存代码
-func SaveCode(code []byte) (string, error) {
+func SaveCode(code []byte) (string, string,error) {
 	dirName := "code/" + GetUUID()
 	path := dirName + "/main.go"
 	err := os.Mkdir(dirName, 0777)
 	if err != nil {
-		return "", err
+		return "", "",err
 	}
 	f, err := os.Create(path)
 	if err != nil {
-		return "", err
+		return "","", err
 	}
 	f.Write(code)
 	defer f.Close()
-	return path, nil
+	return path, dirName,nil
 }
 
 // CheckGoCodeValid
