@@ -11,6 +11,8 @@ import (
 
 func Router() *gin.Engine {
 	r := gin.Default()
+	//解决跨域
+	r.Use(middlewares.Cors())
 	//swagger配置
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	//路由规则

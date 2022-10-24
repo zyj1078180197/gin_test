@@ -192,8 +192,8 @@ func Register(c *gin.Context) {
 	}
 
 	user := new(models.UserBasic)
-
-	err = models.DB.First(&user).Where("mail=?", mail).Error
+	var cnt int64
+	err = models.DB.Debug().Where("mail = ?", mail).Model(&user).Count(&cnt).Error
 	if err != nil {
 
 		c.JSON(http.StatusOK, gin.H{
@@ -202,10 +202,10 @@ func Register(c *gin.Context) {
 		})
 		return
 	}
-	if user.Mail == "" {
+	if cnt > 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"code": -1,
-			"msg":  "账号已存在",
+			"msg":  "该邮箱已被注册",
 		})
 		return
 	}
@@ -284,5 +284,3 @@ func GetRankList(c *gin.Context) {
 	})
 
 }
-
-
