@@ -11,7 +11,7 @@ import (
 	"zyj.cn/models"
 )
 
-// GetProblemList
+// GetCategoryList
 // @Tags 公共方法
 // @Summary 分类列表
 // @Param page query int false "page"

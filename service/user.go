@@ -85,7 +85,7 @@ func Login(c *gin.Context) {
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"code": -1,
-			"msg":  "get userbasic error:" + err.Error(),
+			"msg":  "get userBasic error:" + err.Error(),
 		})
 		return
 	}
@@ -98,6 +98,7 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": map[string]interface{}{
@@ -107,7 +108,7 @@ func Login(c *gin.Context) {
 
 }
 
-// Login
+// SendCode
 // @Tags 公共方法
 // @Summary 发送验证码
 // @Param email formData string false "toUserEmail"

@@ -21,7 +21,7 @@ import (
 	"zyj.cn/models"
 )
 
-// GetProblemList
+// GetSubmitList
 // @Tags 公共方法
 // @Summary 提交列表
 // @Param page query int false "page"
@@ -42,11 +42,11 @@ func GetSubmitList(c *gin.Context) {
 
 	problemIdentity := c.Query("problem_identity")
 	userIdentity := c.Query("user_identity")
-	stauts, _ := strconv.Atoi(c.Query("stauts"))
+	status, _ := strconv.Atoi(c.Query("status"))
 
 	list := make([]*models.SubmitBasic, 0)
 
-	tx := models.GetSubmitList(problemIdentity, userIdentity, stauts)
+	tx := models.GetSubmitList(problemIdentity, userIdentity, status)
 	err = tx.Count(&count).Offset(pageQuery).Limit(size).Find(&list).Error
 
 	if err != nil {
